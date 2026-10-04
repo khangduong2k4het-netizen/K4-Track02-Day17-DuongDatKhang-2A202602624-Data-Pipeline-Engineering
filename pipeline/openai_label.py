@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+from urllib.parse import urlsplit
 
 from dotenv import load_dotenv
 from openai import OpenAI, OpenAIError
@@ -16,6 +17,9 @@ class OpenAILLM:
         if not os.environ.get("OPENAI_API_KEY"):
             raise ValueError("Missing OPENAI_API_KEY in .env or environment")
         self.model = os.environ.get("LLM_MODEL") or "gpt-4o-mini"
+        base_url = os.environ.get("OPENAI_BASE_URL") or "https://api.openai.com/v1"
+        if urlsplit(base_url).hostname == "api.openai.com":
+            self.model = self.model.removeprefix("openai/")
         self.client = OpenAI(max_retries=0, timeout=45)
         self.calls = 0
         self.tokens = 0
