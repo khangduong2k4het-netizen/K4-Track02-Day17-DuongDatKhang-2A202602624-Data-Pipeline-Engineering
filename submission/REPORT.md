@@ -184,3 +184,27 @@ PS> .\.venv\Scripts\python.exe -m scripts.parity
 RESULT: PARITY — both implementations agree
 
 ```
+
+## 6. Bonus B1
+
+Cache theo SHA-256 của prompt đầu vào + model + prompt_version; cache cả phản hồi lỗi để replay không gọi lại. JSON phải chỉ có label thuộc bug/billing/other; phản hồi sai vào llm_label_quarantine, Gold chỉ chứa nhãn hợp lệ của ticket còn sống. Model và prompt_version lưu trên mỗi hàng.
+
+```text
+PS> .\.venv\Scripts\python.exe -m scripts.bonus_llm
+=== bonus: LLM labelling of 11 live tickets ===
+  cost estimate before running: ~484 tokens = $0.0010 per full run
+  [OK ] first run labels every live ticket
+  [OK ] re-run with same model + prompt makes 0 LLM calls
+  [OK ] every Gold label is bug / billing / other
+  [OK ] off-schema answers go to llm_label_quarantine
+  [OK ] new prompt version re-labels on purpose
+  [OK ] labels carry their prompt version
+BONUS PASS
+
+```
+
+OpenAI tùy chọn: cài `requirements-openai.txt`, đặt `OPENAI_API_KEY` trong `.env`, tùy chọn `LLM_MODEL` (mặc định gpt-4o-mini), rồi chạy `python -m pipeline.openai_label`. Provider dùng Responses API với strict JSON schema; đọc key bằng dotenv, không lưu key trong cache/log. Lệnh chạy trên warehouse hiện có, không fresh-build để giữ cache. Ước lượng giá trong checker là giá giả lập, không phải giá OpenAI. Chưa chạy API thật do approval review chặn gửi văn bản có thể còn PII.
+
+Nguồn API: https://developers.openai.com/api/docs/guides/structured-outputs
+
+Commit mã nguồn B1 đã kiểm tra: `f47540e3204f43cbe45c7099052c4aeeefb29e2a`. Toàn bộ pytest sau B1: 34 passed in 3.99s.
