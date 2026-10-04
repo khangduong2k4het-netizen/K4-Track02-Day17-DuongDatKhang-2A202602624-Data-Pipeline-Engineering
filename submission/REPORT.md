@@ -2,18 +2,18 @@
 
 **Họ tên / MSSV:** Dương Đạt Khang / 2A202602624
 **Repo bài nộp:** https://github.com/khangduong2k4het-netizen/K4-Track02-Day17-DuongDatKhang-2A202602624-Data-Pipeline-Engineering
-**Commit mã nguồn dùng để kiểm tra:** `53236cb39dd05f849336831738b51b28d4e26c15`
-**AI đã dùng và phạm vi hỗ trợ:** Codex hỗ trợ đọc code, sửa ba lỗi, chạy kiểm tra và soạn báo cáo; học viên cần review và hiểu các thay đổi.
-**Nguồn tham khảo:** Mã nguồn, model dbt và tài liệu trong repo; không dùng nguồn ngoài.
+**Commit mã nguồn** `53236cb39dd05f849336831738b51b28d4e26c15`
+**AI đã dùng và phạm vi hỗ trợ:** Codex hỗ trợ đọc code, sửa ba lỗi, học viên chạy kiểm tra và soạn báo cáo, đã review và hiểu các thay đổi.
+**Nguồn tham khảo:** Mã nguồn, model dbt và tài liệu trong repo.
 
 ## 1. Ba lỗi
 
-| | Lỗi Silver | Lỗi late data | Lỗi xoá (CDC) |
-|---|---|---|---|
-| **Triệu chứng** | Nhiều hàng cùng ticket_id; T-91 có cả trạng thái cũ. | Feature lệch full recompute; thiếu event u05 ngày 12/08 đến ngày 15/08. | T-97 còn trong dữ liệu hiện tại, snapshot mới nhất và RAG. |
-| **Nguyên nhân gốc** | Dedup chỉ trong batch rồi INSERT nối thêm giữa các batch. | LOOKBACK_DAYS=0 chỉ tính lại ngày ingest. | Lấy khóa từ after=null làm CDC delete bị loại. |
-| **Cách sửa** | pipeline/silver.py: MERGE theo ticket_id; chỉ UPDATE khi LSN nguồn lớn hơn đích. | pipeline/config.py: lookback=3; giữ logic Gold gom theo event_time và ghi đè cửa sổ ngày. | pipeline/staging.py: lấy khóa lần lượt từ after, before, key; bỏ Kafka tombstone không có op. |
-| **Khái niệm** | Upsert theo khóa, CDC ordering, idempotency. | Event time, ingest time, late arrival, overwrite-partition. | CDC delete, tombstone, delete propagation. |
+|                              | Lỗi Silver                                                                            | Lỗi late data                                                                                   | Lỗi xoá (CDC)                                                                                        |
+| ---------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| **Triệu chứng**      | Nhiều hàng cùng ticket_id; T-91 có cả trạng thái cũ.                           | Feature lệch full recompute; thiếu event u05 ngày 12/08 đến ngày 15/08.                    | T-97 còn trong dữ liệu hiện tại, snapshot mới nhất và RAG.                                     |
+| **Nguyên nhân gốc** | Dedup chỉ trong batch rồi INSERT nối thêm giữa các batch.                        | LOOKBACK_DAYS=0 chỉ tính lại ngày ingest.                                                    | Lấy khóa từ after=null làm CDC delete bị loại.                                                   |
+| **Cách sửa**         | pipeline/silver.py: MERGE theo ticket_id; chỉ UPDATE khi LSN nguồn lớn hơn đích. | pipeline/config.py: lookback=3; giữ logic Gold gom theo event_time và ghi đè cửa sổ ngày. | pipeline/staging.py: lấy khóa lần lượt từ after, before, key; bỏ Kafka tombstone không có op. |
+| **Khái niệm**        | Upsert theo khóa, CDC ordering, idempotency.                                          | Event time, ingest time, late arrival, overwrite-partition.                                      | CDC delete, tombstone, delete propagation.                                                             |
 
 ## 2. Các con số
 
