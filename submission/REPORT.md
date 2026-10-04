@@ -203,8 +203,20 @@ BONUS PASS
 
 ```
 
-OpenAI tùy chọn: cài `requirements-openai.txt`, đặt `OPENAI_API_KEY` trong `.env`, tùy chọn `LLM_MODEL` (mặc định gpt-4o-mini), rồi chạy `python -m pipeline.openai_label`. Provider dùng Responses API với strict JSON schema; đọc key bằng dotenv, không lưu key trong cache/log. Lệnh chạy trên warehouse hiện có, không fresh-build để giữ cache. Ước lượng giá trong checker là giá giả lập, không phải giá OpenAI. Chưa chạy API thật do approval review chặn gửi văn bản có thể còn PII.
+OpenAI tùy chọn: cài `requirements-openai.txt`, đặt `OPENAI_API_KEY` trong `.env`, tùy chọn `LLM_MODEL` (mặc định gpt-4o-mini), rồi chạy `python -m pipeline.openai_label`. Provider dùng Responses API với strict JSON schema; đọc key bằng dotenv, không lưu key trong cache/log. Lệnh chạy trên warehouse hiện có, không fresh-build để giữ cache. Ước lượng giá trong checker là giá giả lập, không phải giá OpenAI. Đã chạy API thật sau khi học viên cho phép gửi seed giả lập: 11 nhãn hợp lệ, 11 calls, 1319 tokens; replay 0 calls. Provider chuẩn hoá tiền tố openai/ khi endpoint là api.openai.com.
 
 Nguồn API: https://developers.openai.com/api/docs/guides/structured-outputs
 
 Commit mã nguồn B1 đã kiểm tra: `f47540e3204f43cbe45c7099052c4aeeefb29e2a`. Toàn bộ pytest sau B1: 34 passed in 3.99s.
+
+### OpenAI thực tế
+
+```text
+PS> .\.venv\Scripts\python.exe -m pipeline.openai_label
+OpenAI model=gpt-4o-mini; live tickets=11; estimated tokens~484
+Token estimate is approximate; FakeLLM pricing does not apply to OpenAI.
+First run: {'labeled': 11, 'calls': 11}; usage tokens=1319
+Replay: {'labeled': 11, 'calls': 0}
+OPENAI CACHE PASS
+
+```
